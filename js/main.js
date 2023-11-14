@@ -21,63 +21,79 @@ var cuentaSeleccionada = null;
 // Variable para indicar si ya se ingresó el PIN
 var pinIngresado = false;
 
-// Función para solicitar el PIN al inicio
-function solicitarPIN() {
-  if (!pinIngresado) {
-    var inputPIN = prompt("Ingrese su PIN:");
-    if (inputPIN === null || inputPIN === "") {
-      alert("Operación cancelada. Debes ingresar el PIN para continuar.");
-      solicitarPIN();
-    } else if (isNaN(inputPIN)) {
-      alert("Por favor, ingresa solo números para el PIN.");
-      solicitarPIN();
-    } else {
-      var inputPINNum = parseInt(inputPIN);
-      if (inputPINNum === pin) {
-        pinIngresado = true;
-        // Luego de autenticar, permite seleccionar la cuenta
-        seleccionarCuenta();
-      } else {
-        alert("PIN incorrecto. Inténtalo de nuevo.");
-        solicitarPIN();
-      }
-    }
-  } else {
-    // Si el PIN ya se ingresó, permite seleccionar la cuenta
-    seleccionarCuenta();
-  }
-}
-
-// Función para seleccionar una cuenta
-function seleccionarCuenta() {
-  var cuentasDisponibles = "";
-  for (var i = 0; i < cuentasClientes.length; i++) {
-    cuentasDisponibles += (i + 1) + " - " + cuentasClientes[i].nombreUsuario + "\n";
-  }
-  var seleccion = prompt("Seleccione una cuenta:\n" + cuentasDisponibles);
-  if (seleccion === null || seleccion === "") {
-    alert("Operación cancelada. Debes seleccionar una cuenta.");
-    seleccionarCuenta();
-  } else {
-    var seleccionNum = parseInt(seleccion);
-    if (seleccionNum >= 1 && seleccionNum <= cuentasClientes.length) {
-      cuentaSeleccionada = seleccionNum - 1; // Restamos 1 para obtener el índice correcto del array
-      // Después de seleccionar la cuenta, ejecuta el resto del programa
-      cargarNombreEnPantalla();
-      actualizarSaldoEnPantalla();
-      actualizarLimiteEnPantalla();
-      // Puedes agregar aquí otras funciones específicas de la cuenta seleccionada
-    } else {
-      alert("Selección inválida. Por favor, elige una cuenta válida.");
-      seleccionarCuenta();
-    }
-  }
-}
-
 // Llamamos a la función para solicitar el PIN al inicio
 solicitarPIN();
 
-// Funciones restantes...
+// Función para solicitar el PIN al inicio
+function solicitarPIN() {
+  Swal.fire({
+    title: 'Ingrese su PIN:',
+    input: 'password',
+    inputAttributes: {
+      autocapitalize: 'off',
+      maxlength: 4,
+      inputMode: 'numeric',
+    },
+    showCancelButton: true,
+    confirmButtonText: 'Aceptar',
+    cancelButtonText: 'Cancelar',
+    showLoaderOnConfirm: true,
+    preConfirm: (inputPIN) => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          if (inputPIN === '' || isNaN(inputPIN)) {
+            Swal.showValidationMessage('Por favor, ingresa solo números para el PIN.');
+          } else {
+            var inputPINNum = parseInt(inputPIN);
+            if (inputPINNum === pin) {
+              pinIngresado = true;
+              // Luego de autenticar, permite seleccionar la cuenta
+              seleccionarCuenta();
+            } else {
+              Swal.showValidationMessage('PIN incorrecto. Inténtalo de nuevo.');
+            }
+          }
+          resolve();
+        }, 1000);
+      });
+    },
+    allowOutsideClick: () => !Swal.isLoading(),
+  });
+}
+// Función para seleccionar una cuenta
+function seleccionarCuenta() {
+  var cuentasDisponibles = cuentasClientes.map((cuenta, index) => `${index + 1} - ${cuenta.nombreUsuario}`);
+
+  Swal.fire({
+    title: 'Seleccione una cuenta:',
+    input: 'select',
+    inputOptions: cuentasDisponibles,
+    showCancelButton: true,
+    confirmButtonText: 'Aceptar',
+    cancelButtonText: 'Cancelar',
+    showLoaderOnConfirm: true,
+    preConfirm: (seleccion) => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          var seleccionNum = parseInt(seleccion);
+          if (seleccionNum >= 1 && seleccionNum <= cuentasClientes.length) {
+            cuentaSeleccionada = seleccionNum - 1; // Restamos 1 para obtener el índice correcto del array
+            // Después de seleccionar la cuenta, ejecuta el resto del programa
+            cargarNombreEnPantalla();
+            actualizarSaldoEnPantalla();
+            actualizarLimiteEnPantalla();
+            // Puedes agregar aquí otras funciones específicas de la cuenta seleccionada
+          } else {
+            Swal.showValidationMessage('Selección inválida. Por favor, elige una cuenta válida.');
+          }
+          resolve();
+        }, 1000);
+      });
+    },
+    allowOutsideClick: () => !Swal.isLoading(),
+  });
+}
+
 
 // Funciones que actualizan el valor de las variables en el HTML
 function cargarNombreEnPantalla() {
@@ -101,190 +117,245 @@ function restarDinero(cantidad) {
 }
 
 function cambiarLimiteDeExtraccion() {
-  var nuevoLimite = prompt("Ingrese un nuevo límite de extracción:");
-  if (nuevoLimite !== null && nuevoLimite !== "") {
-    var nuevoLimiteNum = parseInt(nuevoLimite);
-    if (!isNaN(nuevoLimiteNum)) {
-      limiteExtraccion = nuevoLimiteNum;
-      actualizarLimiteEnPantalla();
-      alert("El nuevo límite de extracción es: $" + limiteExtraccion);
-    } else {
-      alert("Por favor, ingresa un monto válido para el límite de extracción.");
-    }
-  } else {
-    alert("Operación cancelada. No se ingresó un nuevo límite de extracción.");
-  }
+  Swal.fire({
+    title: 'Ingrese un nuevo límite de extracción:',
+    input: 'text',
+    inputAttributes: {
+      autocapitalize: 'off',
+      inputMode: 'numeric',
+    },
+    showCancelButton: true,
+    confirmButtonText: 'Aceptar',
+    cancelButtonText: 'Cancelar',
+    showLoaderOnConfirm: true,
+    preConfirm: (nuevoLimite) => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          var nuevoLimiteNum = parseInt(nuevoLimite);
+          if (!isNaN(nuevoLimiteNum)) {
+            limiteExtraccion = nuevoLimiteNum;
+            actualizarLimiteEnPantalla();
+            Swal.fire('Éxito', `El nuevo límite de extracción es: $${limiteExtraccion}`, 'success');
+          } else {
+            Swal.showValidationMessage('Por favor, ingresa un monto válido para el límite de extracción.');
+          }
+          resolve();
+        }, 1000);
+      });
+    },
+    allowOutsideClick: () => !Swal.isLoading(),
+  });
 }
 
 function mostrarOperacion(alertaDeOperacion, accionDeOperacion, transaccionDeDinero) {
-  alert(
-    "Has " + alertaDeOperacion + ": $" + transaccionDeDinero + "\n" +
-    "Saldo anterior: $" + accionDeOperacion + "\n" +
-    "Saldo actual: $" + cuentasClientes[cuentaSeleccionada].saldo
-  );
+  Swal.fire({
+    title: 'Operación Exitosa',
+    html: `Has ${alertaDeOperacion} $${transaccionDeDinero}<br>
+    Saldo anterior: $${accionDeOperacion}<br>
+    Saldo actual: $${cuentasClientes[cuentaSeleccionada].saldo}`,
+    icon: 'success'
+  });
 }
 
 function extraerDinero() {
-  var extraerDinero = prompt("Ingrese la cantidad de dinero que desea extraer:");
-  if (extraerDinero !== null && extraerDinero !== "") {
-    var dineroExtraido = parseInt(extraerDinero);
-    if (!isNaN(dineroExtraido)) {
-      if (dineroExtraido > cuentasClientes[cuentaSeleccionada].saldo) {
-        alert("No hay saldo disponible para extraer esa cantidad de dinero.");
-      } else if (dineroExtraido > limiteExtraccion) {
-        alert("La cantidad que deseas extraer es mayor a tu límite de extracción.");
-      } else if (dineroExtraido % 100 !== 0) {
-        alert("Solo puedes extraer billetes de 100.");
-      } else {
-        restarDinero(dineroExtraido);
-        mostrarOperacion(
-          "retirado",
-          cuentasClientes[cuentaSeleccionada].saldo + dineroExtraido,
-          dineroExtraido
-        );
-        actualizarSaldoEnPantalla();
-      }
-    } else {
-      alert("Por favor, ingresa un monto válido para extraer.");
-    }
-  } else {
-    alert("Operación cancelada. No se ingresó un monto para extraer.");
-  }
+  Swal.fire({
+    title: 'Ingrese la cantidad de dinero que desea extraer:',
+    input: 'text',
+    inputAttributes: {
+      autocapitalize: 'off',
+      inputMode: 'numeric',
+    },
+    showCancelButton: true,
+    confirmButtonText: 'Aceptar',
+    cancelButtonText: 'Cancelar',
+    showLoaderOnConfirm: true,
+    preConfirm: (extraerDinero) => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          var dineroExtraido = parseInt(extraerDinero);
+          if (!isNaN(dineroExtraido)) {
+            if (dineroExtraido > cuentasClientes[cuentaSeleccionada].saldo) {
+              Swal.fire('Error', 'No hay saldo disponible para extraer esa cantidad de dinero.', 'error');
+            } else if (dineroExtraido > limiteExtraccion) {
+              Swal.fire('Error', 'La cantidad que deseas extraer es mayor a tu límite de extracción.', 'error');
+            } else if (dineroExtraido % 100 !== 0) {
+              Swal.fire('Error', 'Solo puedes extraer billetes de 100.', 'error');
+            } else {
+              restarDinero(dineroExtraido);
+              mostrarOperacion('retirado', cuentasClientes[cuentaSeleccionada].saldo + dineroExtraido, dineroExtraido);
+              actualizarSaldoEnPantalla();
+            }
+          } else {
+            Swal.showValidationMessage('Por favor, ingresa un monto válido para extraer.');
+          }
+          resolve();
+        }, 1000);
+      });
+    },
+    allowOutsideClick: () => !Swal.isLoading(),
+  });
 }
 
 function depositarDinero() {
-  var depositarDinero = prompt("Ingrese la cantidad de dinero que desea depositar:");
-  if (depositarDinero !== null && depositarDinero !== "") {
-    var dineroDepositado = parseInt(depositarDinero);
-    if (!isNaN(dineroDepositado)) {
-      sumarDinero(dineroDepositado);
-      mostrarOperacion(
-        "depositado",
-        cuentasClientes[cuentaSeleccionada].saldo - dineroDepositado,
-        dineroDepositado
-      );
-      actualizarSaldoEnPantalla();
-    } else {
-      alert("Por favor, ingresa un monto válido para depositar.");
-    }
-  } else {
-    alert("Operación cancelada. No se ingresó un monto para depositar.");
-  }
+  Swal.fire({
+    title: 'Ingrese la cantidad de dinero que desea depositar:',
+    input: 'text',
+    inputAttributes: {
+      autocapitalize: 'off',
+      inputMode: 'numeric',
+    },
+    showCancelButton: true,
+    confirmButtonText: 'Aceptar',
+    cancelButtonText: 'Cancelar',
+    showLoaderOnConfirm: true,
+    preConfirm: (depositarDinero) => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          var dineroDepositado = parseInt(depositarDinero);
+          if (!isNaN(dineroDepositado)) {
+            sumarDinero(dineroDepositado);
+            mostrarOperacion('depositado', cuentasClientes[cuentaSeleccionada].saldo - dineroDepositado, dineroDepositado);
+            actualizarSaldoEnPantalla();
+          } else {
+            Swal.showValidationMessage('Por favor, ingresa un monto válido para depositar.');
+          }
+          resolve();
+        }, 1000);
+      });
+    },
+    allowOutsideClick: () => !Swal.isLoading(),
+  });
 }
 
 function pagoDeServicio(servicio, precioDeServicio) {
   if (cuentasClientes[cuentaSeleccionada].saldo < precioDeServicio) {
-    alert("No hay suficiente saldo para pagar este servicio.");
+    Swal.fire('Error', 'No hay suficiente saldo para pagar este servicio.', 'error');
   } else {
-    alert(
-      "Has pagado el servicio " + servicio + ".\n" +
-      "Saldo anterior: $" + cuentasClientes[cuentaSeleccionada].saldo + "\n" +
-      "Dinero descontado: $" + precioDeServicio + "\n" +
-      "Saldo actual: $" + (cuentasClientes[cuentaSeleccionada].saldo - precioDeServicio)
-    );
+    Swal.fire({
+      title: `Has pagado el servicio ${servicio}.`,
+      html: `Saldo anterior: $${cuentasClientes[cuentaSeleccionada].saldo}<br>
+      Dinero descontado: $${precioDeServicio}<br>
+      Saldo actual: $${(cuentasClientes[cuentaSeleccionada].saldo - precioDeServicio)}`,
+      icon: 'success'
+    });
     restarDinero(precioDeServicio);
     actualizarSaldoEnPantalla();
   }
 }
 
 function pagarServicio() {
-  var servicioAPagar = prompt(
-    "Ingrese el número que corresponda con el servicio que quieres pagar:" + "\n" +
-    "1 - Agua" + "\n" +
-    "2 - Luz" + "\n" +
-    "3 - Internet" + "\n" +
-    "4 - Teléfono" + "\n"
-  );
-  if (servicioAPagar !== null && servicioAPagar !== "") {
-    var servicioAPagarNum = parseInt(servicioAPagar);
-    if (!isNaN(servicioAPagarNum) && servicioAPagarNum >= 1 && servicioAPagarNum <= 4) {
-      switch (servicioAPagarNum) {
-        case 1:
-          pagoDeServicio("Agua", precioDeServicioAgua);
-          break;
-        case 2:
-          pagoDeServicio("Luz", precioDeServicioLuz);
-          break;
-        case 3:
-          pagoDeServicio("Internet", precioDeServicioInternet);
-          break;
-        case 4:
-          pagoDeServicio("Teléfono", precioDeServicioTelefono);
-          break;
-      }
-    } else {
-      alert("Selección inválida. Por favor, elige un servicio válido.");
-    }
-  } else {
-    alert("Operación cancelada. No se ingresó un servicio para pagar.");
-  }
+  var opcionesServicio = {
+    1: { servicio: 'Agua', precio: precioDeServicioAgua },
+    2: { servicio: 'Luz', precio: precioDeServicioLuz },
+    3: { servicio: 'Internet', precio: precioDeServicioInternet },
+    4: { servicio: 'Teléfono', precio: precioDeServicioTelefono }
+  };
+
+  Swal.fire({
+    title: `Seleccione el servicio que desea pagar:`,
+    input: 'select',
+    inputOptions: Object.keys(opcionesServicio).map((key) => `${key} - ${opcionesServicio[key].servicio}`),
+    showCancelButton: true,
+    confirmButtonText: 'Aceptar',
+    cancelButtonText: 'Cancelar',
+    showLoaderOnConfirm: true,
+    preConfirm: (opcion) => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          var opcionNum = parseInt(opcion);
+          if (!isNaN(opcionNum) && opcionNum >= 1 && opcionNum <= 4) {
+            var servicio = opcionesServicio[opcionNum];
+            pagoDeServicio(servicio.servicio, servicio.precio);
+          } else {
+            Swal.showValidationMessage('Selección inválida. Por favor, elige un servicio válido.');
+          }
+          resolve();
+        }, 1000);
+      });
+    },
+    allowOutsideClick: () => !Swal.isLoading(),
+  });
 }
 
 function verCuentas() {
   var cuentasDisponibles = "";
   for (var i = 0; i < cuentasClientes.length; i++) {
-    cuentasDisponibles += "Cuenta " + (i + 1) + ": " + cuentasClientes[i].nombreUsuario + " - Saldo: $" + cuentasClientes[i].saldo + "\n";
+    cuentasDisponibles += `Cuenta ${i + 1}: ${cuentasClientes[i].nombreUsuario} - Saldo: $${cuentasClientes[i].saldo}\n`;
   }
-  alert("Tus cuentas disponibles:\n" + cuentasDisponibles);
+  Swal.fire('Tus cuentas disponibles:', cuentasDisponibles);
 }
 
 // Función para transferir dinero
 function transferirDinero() {
-  var cuentasDisponibles = "";
-  for (var i = 0; i < cuentasClientes.length; i++) {
-    cuentasDisponibles += (i + 1) + " - " + cuentasClientes[i].nombreUsuario + "\n";
-  }
+  var cuentasDestino = generarCuentasAleatorias(4);
 
-  var cuentasDestino = generarCuentasAleatorias(4); // Generamos 4 cuentas aleatorias
+  Swal.fire({
+    title: 'Seleccione una cuenta para transferir:',
+    input: 'select',
+    inputOptions: cuentasDestino.map((cuenta, index) => `${index + 1} - ${cuenta.nombreUsuario}`),
+    showCancelButton: true,
+    confirmButtonText: 'Aceptar',
+    cancelButtonText: 'Cancelar',
+    showLoaderOnConfirm: true,
+    preConfirm: (seleccion) => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          var opcionNum = parseInt(seleccion);
+          if (opcionNum >= 1 && opcionNum <= cuentasDestino.length) {
+            var cuentaDestino = cuentasDestino[opcionNum - 1];
 
-  var opcionesTransferencia = "";
-  for (var i = 0; i < cuentasDestino.length; i++) {
-    opcionesTransferencia += (i + 1) + " - " + cuentasDestino[i].nombreUsuario + "\n";
-  }
+            Swal.fire({
+              title: 'Ingrese el monto a transferir:',
+              input: 'text',
+              inputAttributes: {
+                autocapitalize: 'off',
+                inputMode: 'numeric',
+              },
+              showCancelButton: true,
+              confirmButtonText: 'Aceptar',
+              cancelButtonText: 'Cancelar',
+              showLoaderOnConfirm: true,
+              preConfirm: (montoTransferencia) => {
+                return new Promise((resolve) => {
+                  setTimeout(() => {
+                    var montoNum = parseInt(montoTransferencia);
+                    if (!isNaN(montoNum) && montoNum > 0 && montoNum <= cuentasClientes[cuentaSeleccionada].saldo) {
+                      restarDinero(montoNum);
+                      cuentaDestino.saldo += montoNum;
 
-  var opcionCuentaDestino = prompt("Seleccione una cuenta para transferir:\n" + opcionesTransferencia);
-  if (opcionCuentaDestino === null || opcionCuentaDestino === "") {
-    alert("Operación cancelada. Debes seleccionar una cuenta para transferir.");
-  } else {
-    var opcionNum = parseInt(opcionCuentaDestino);
-    if (opcionNum >= 1 && opcionNum <= cuentasDestino.length) {
-      var cuentaDestino = cuentasDestino[opcionNum - 1]; // Restamos 1 para obtener el índice correcto del array
+                      Swal.fire(
+                        'Transferencia exitosa',
+                        `Has transferido $${montoNum} a la cuenta de ${cuentaDestino.nombreUsuario}.`,
+                        'success'
+                      );
 
-      var montoTransferencia = prompt("Ingrese el monto a transferir:");
-      if (montoTransferencia === null || montoTransferencia === "") {
-        alert("Operación cancelada. No se ingresó un monto para transferir.");
-      } else {
-        var montoNum = parseInt(montoTransferencia);
-        if (!isNaN(montoNum) && montoNum > 0 && montoNum <= cuentasClientes[cuentaSeleccionada].saldo) {
-          // Realizamos la transferencia
-          restarDinero(montoNum);
-          cuentaDestino.saldo += montoNum;
-
-          // Mostramos la operación
-          alert(
-            "Has transferido $" + montoNum + " a la cuenta de " + cuentaDestino.nombreUsuario + ".\n" +
-            "Saldo anterior: $" + (cuentasClientes[cuentaSeleccionada].saldo + montoNum) + "\n" +
-            "Saldo actual: $" + cuentasClientes[cuentaSeleccionada].saldo
-          );
-
-          // Actualizamos saldos en pantalla
-          actualizarSaldoEnPantalla();
-        } else {
-          alert("Monto inválido para transferir o saldo insuficiente.");
-        }
-      }
-    } else {
-      alert("Selección inválida. Por favor, elige una cuenta válida.");
-    }
-  }
+                      actualizarSaldoEnPantalla();
+                    } else {
+                      Swal.showValidationMessage('Monto inválido para transferencia o saldo insuficiente.');
+}
+resolve();
+}, 1000);
+});
+},
+allowOutsideClick: () => !Swal.isLoading(),
+});
+} else {
+Swal.showValidationMessage('Selección inválida. Por favor, elige una cuenta válida.');
+}
+resolve();
+}, 1000);
+});
+},
+allowOutsideClick: () => !Swal.isLoading(),
+});
 }
 
 // Función para generar cuentas aleatorias
 function generarCuentasAleatorias(cantidad) {
-  var cuentasAleatorias = [];
-  for (var i = 0; i < cantidad; i++) {
-    var saldoAleatorio = Math.floor(Math.random() * 5000) + 1000; // Saldo aleatorio entre 1000 y 6000
-    cuentasAleatorias.push({ nombreUsuario: "Destino" + (i + 1), codigoCuenta: 8000 + i, saldo: saldoAleatorio });
-  }
-  return cuentasAleatorias;
+var cuentasAleatorias = [];
+for (var i = 0; i < cantidad; i++) {
+var saldoAleatorio = Math.floor(Math.random() * 5000) + 1000; // Saldo aleatorio entre 1000 y 6000
+cuentasAleatorias.push({ nombreUsuario: "Destino" + (i + 1), codigoCuenta: 8000 + i, saldo: saldoAleatorio });
+}
+return cuentasAleatorias;
 }
