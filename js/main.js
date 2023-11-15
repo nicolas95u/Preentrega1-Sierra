@@ -76,8 +76,8 @@ function seleccionarCuenta() {
       return new Promise((resolve) => {
         setTimeout(() => {
           var seleccionNum = parseInt(seleccion);
-          if (seleccionNum >= 1 && seleccionNum <= cuentasClientes.length) {
-            cuentaSeleccionada = seleccionNum - 1; // Restamos 1 para obtener el índice correcto del array
+          if (seleccionNum >= 0 && seleccionNum <= cuentasClientes.length - 1) {
+            cuentaSeleccionada = seleccionNum ; // Restamos 1 para obtener el índice correcto del array
             // Después de seleccionar la cuenta, ejecuta el resto del programa
             cargarNombreEnPantalla();
             actualizarSaldoEnPantalla();
@@ -245,10 +245,10 @@ function pagoDeServicio(servicio, precioDeServicio) {
 
 function pagarServicio() {
   var opcionesServicio = {
-    1: { servicio: 'Agua', precio: precioDeServicioAgua },
-    2: { servicio: 'Luz', precio: precioDeServicioLuz },
-    3: { servicio: 'Internet', precio: precioDeServicioInternet },
-    4: { servicio: 'Teléfono', precio: precioDeServicioTelefono }
+    0: { servicio: 'Agua', precio: precioDeServicioAgua },
+    1: { servicio: 'Luz', precio: precioDeServicioLuz },
+    2: { servicio: 'Internet', precio: precioDeServicioInternet },
+    3: { servicio: 'Teléfono', precio: precioDeServicioTelefono }
   };
 
   Swal.fire({
@@ -263,7 +263,7 @@ function pagarServicio() {
       return new Promise((resolve) => {
         setTimeout(() => {
           var opcionNum = parseInt(opcion);
-          if (!isNaN(opcionNum) && opcionNum >= 1 && opcionNum <= 4) {
+          if (!isNaN(opcionNum) && opcionNum >= 0 && opcionNum <= 3) {
             var servicio = opcionesServicio[opcionNum];
             pagoDeServicio(servicio.servicio, servicio.precio);
           } else {
