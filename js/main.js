@@ -1,28 +1,63 @@
-var nombreUsuario = "Bienvenido/a Estimado";
-var pin = 1234; // Establece tu PIN aquí
-var limiteExtraccion = 3000;
+// Variable para almacenar el nombre de usuario
+let nombreUsuario = "Bienvenido/a Estimado";
 
-var dineroExtraido;
-var dineroDepositado;
+// Variables de configuración
+let pin = 1234; // Establece tu PIN aquí
+let limiteExtraccion = 3000;
 
-var precioDeServicioAgua = 350;
-var precioDeServicioLuz = 210;
-var precioDeServicioInternet = 570;
-var precioDeServicioTelefono = 425;
+// Variables para transacciones
+let dineroExtraido;
+let dineroDepositado;
 
-var cuentasClientes = [
+// Precios de servicios
+const precioDeServicioAgua = 350;
+const precioDeServicioLuz = 210;
+const precioDeServicioInternet = 570;
+const precioDeServicioTelefono = 425;
+
+// Cuentas de clientes
+const cuentasClientes = [
   { nombreUsuario: "Cliente", codigoCuenta: 1234, saldo: 8000 },
   { nombreUsuario: "Cliente", codigoCuenta: 5678, saldo: 10000 }
 ];
 
 // Variable para almacenar la cuenta seleccionada
-var cuentaSeleccionada = null;
+let cuentaSeleccionada = null;
 
 // Variable para indicar si ya se ingresó el PIN
-var pinIngresado = false;
+let pinIngresado = false;
 
 // Llamamos a la función para solicitar el PIN al inicio
+cargarDatosGuardados(); // Cargar datos al inicio
 solicitarPIN();
+
+// Función para cargar datos guardados desde localStorage
+function cargarDatosGuardados() {
+  const nombreUsuarioGuardado = localStorage.getItem('nombreUsuario');
+  const cuentaSeleccionadaGuardada = localStorage.getItem('cuentaSeleccionada');
+
+  if (nombreUsuarioGuardado) {
+    nombreUsuario = nombreUsuarioGuardado;
+    // Actualizar otros datos necesarios
+  }
+
+  if (pinIngresadoGuardado === 'true') {
+    pinIngresado = true;
+    // Realizar acciones adicionales después de ingresar el PIN
+  }
+
+  if (cuentaSeleccionadaGuardada !== null) {
+    cuentaSeleccionada = parseInt(cuentaSeleccionadaGuardada, 10);
+    // Realizar acciones adicionales después de seleccionar la cuenta
+  }
+}
+
+// Al finalizar una operación, guardar datos actualizados
+function guardarDatosEnLocalStorage() {
+  localStorage.setItem('nombreUsuario', nombreUsuario);
+  localStorage.setItem('pinIngresado', pinIngresado.toString());
+  localStorage.setItem('cuentaSeleccionada', cuentaSeleccionada);
+}
 
 // Función para solicitar el PIN al inicio
 function solicitarPIN() {
@@ -44,7 +79,7 @@ function solicitarPIN() {
           if (inputPIN === '' || isNaN(inputPIN)) {
             Swal.showValidationMessage('Por favor, ingresa solo números para el PIN.');
           } else {
-            var inputPINNum = parseInt(inputPIN);
+            const inputPINNum = parseInt(inputPIN);
             if (inputPINNum === pin) {
               pinIngresado = true;
               // Luego de autenticar, permite seleccionar la cuenta
@@ -60,9 +95,10 @@ function solicitarPIN() {
     allowOutsideClick: () => !Swal.isLoading(),
   });
 }
+
 // Función para seleccionar una cuenta
 function seleccionarCuenta() {
-  var cuentasDisponibles = cuentasClientes.map((cuenta, index) => `${index + 1} - ${cuenta.nombreUsuario}`);
+  const cuentasDisponibles = cuentasClientes.map((cuenta, index) => `${index + 1} - ${cuenta.nombreUsuario}`);
 
   Swal.fire({
     title: 'Seleccione una cuenta:',
@@ -75,9 +111,9 @@ function seleccionarCuenta() {
     preConfirm: (seleccion) => {
       return new Promise((resolve) => {
         setTimeout(() => {
-          var seleccionNum = parseInt(seleccion);
+          const seleccionNum = parseInt(seleccion);
           if (seleccionNum >= 0 && seleccionNum <= cuentasClientes.length - 1) {
-            cuentaSeleccionada = seleccionNum ; // Restamos 1 para obtener el índice correcto del array
+            cuentaSeleccionada = seleccionNum; // Restamos 1 para obtener el índice correcto del array
             // Después de seleccionar la cuenta, ejecuta el resto del programa
             cargarNombreEnPantalla();
             actualizarSaldoEnPantalla();
@@ -94,16 +130,13 @@ function seleccionarCuenta() {
   });
 }
 
-
 // Funciones que actualizan el valor de las variables en el HTML
 function cargarNombreEnPantalla() {
   document.getElementById("nombre").innerHTML = nombreUsuario + " " + cuentasClientes[cuentaSeleccionada].nombreUsuario;
 }
-
 function actualizarSaldoEnPantalla() {
   document.getElementById("saldo-cuenta").innerHTML = "$" + cuentasClientes[cuentaSeleccionada].saldo;
 }
-
 function actualizarLimiteEnPantalla() {
   document.getElementById("limite-extraccion").innerHTML = "Tu límite de extracción es: $" + limiteExtraccion;
 }
@@ -131,7 +164,7 @@ function cambiarLimiteDeExtraccion() {
     preConfirm: (nuevoLimite) => {
       return new Promise((resolve) => {
         setTimeout(() => {
-          var nuevoLimiteNum = parseInt(nuevoLimite);
+          const nuevoLimiteNum = parseInt(nuevoLimite);
           if (!isNaN(nuevoLimiteNum)) {
             limiteExtraccion = nuevoLimiteNum;
             actualizarLimiteEnPantalla();
@@ -172,7 +205,7 @@ function extraerDinero() {
     preConfirm: (extraerDinero) => {
       return new Promise((resolve) => {
         setTimeout(() => {
-          var dineroExtraido = parseInt(extraerDinero);
+          const dineroExtraido = parseInt(extraerDinero);
           if (!isNaN(dineroExtraido)) {
             if (dineroExtraido > cuentasClientes[cuentaSeleccionada].saldo) {
               Swal.fire('Error', 'No hay saldo disponible para extraer esa cantidad de dinero.', 'error');
@@ -211,7 +244,7 @@ function depositarDinero() {
     preConfirm: (depositarDinero) => {
       return new Promise((resolve) => {
         setTimeout(() => {
-          var dineroDepositado = parseInt(depositarDinero);
+          const dineroDepositado = parseInt(depositarDinero);
           if (!isNaN(dineroDepositado)) {
             sumarDinero(dineroDepositado);
             mostrarOperacion('depositado', cuentasClientes[cuentaSeleccionada].saldo - dineroDepositado, dineroDepositado);
@@ -225,6 +258,7 @@ function depositarDinero() {
     },
     allowOutsideClick: () => !Swal.isLoading(),
   });
+  guardarDatosEnLocalStorage(); // Guardar datos actualizados
 }
 
 function pagoDeServicio(servicio, precioDeServicio) {
@@ -244,7 +278,7 @@ function pagoDeServicio(servicio, precioDeServicio) {
 }
 
 function pagarServicio() {
-  var opcionesServicio = {
+  const opcionesServicio = {
     0: { servicio: 'Agua', precio: precioDeServicioAgua },
     1: { servicio: 'Luz', precio: precioDeServicioLuz },
     2: { servicio: 'Internet', precio: precioDeServicioInternet },
@@ -262,9 +296,9 @@ function pagarServicio() {
     preConfirm: (opcion) => {
       return new Promise((resolve) => {
         setTimeout(() => {
-          var opcionNum = parseInt(opcion);
+          const opcionNum = parseInt(opcion);
           if (!isNaN(opcionNum) && opcionNum >= 0 && opcionNum <= 3) {
-            var servicio = opcionesServicio[opcionNum];
+            const servicio = opcionesServicio[opcionNum];
             pagoDeServicio(servicio.servicio, servicio.precio);
           } else {
             Swal.showValidationMessage('Selección inválida. Por favor, elige un servicio válido.');
@@ -278,8 +312,8 @@ function pagarServicio() {
 }
 
 function verCuentas() {
-  var cuentasDisponibles = "";
-  for (var i = 0; i < cuentasClientes.length; i++) {
+  let cuentasDisponibles = "";
+  for (let i = 0; i < cuentasClientes.length; i++) {
     cuentasDisponibles += `Cuenta ${i + 1}: ${cuentasClientes[i].nombreUsuario} - Saldo: $${cuentasClientes[i].saldo}\n`;
   }
   Swal.fire('Tus cuentas disponibles:', cuentasDisponibles);
@@ -287,7 +321,7 @@ function verCuentas() {
 
 // Función para transferir dinero
 function transferirDinero() {
-  var cuentasDestino = generarCuentasAleatorias(4);
+  const cuentasDestino = generarCuentasAleatorias(4);
 
   Swal.fire({
     title: 'Seleccione una cuenta para transferir:',
@@ -300,9 +334,9 @@ function transferirDinero() {
     preConfirm: (seleccion) => {
       return new Promise((resolve) => {
         setTimeout(() => {
-          var opcionNum = parseInt(seleccion);
+          const opcionNum = parseInt(seleccion);
           if (opcionNum >= 1 && opcionNum <= cuentasDestino.length) {
-            var cuentaDestino = cuentasDestino[opcionNum - 1];
+            const cuentaDestino = cuentasDestino[opcionNum - 1];
 
             Swal.fire({
               title: 'Ingrese el monto a transferir:',
@@ -318,7 +352,7 @@ function transferirDinero() {
               preConfirm: (montoTransferencia) => {
                 return new Promise((resolve) => {
                   setTimeout(() => {
-                    var montoNum = parseInt(montoTransferencia);
+                    const montoNum = parseInt(montoTransferencia);
                     if (!isNaN(montoNum) && montoNum > 0 && montoNum <= cuentasClientes[cuentaSeleccionada].saldo) {
                       restarDinero(montoNum);
                       cuentaDestino.saldo += montoNum;
@@ -332,30 +366,31 @@ function transferirDinero() {
                       actualizarSaldoEnPantalla();
                     } else {
                       Swal.showValidationMessage('Monto inválido para transferencia o saldo insuficiente.');
-}
-resolve();
-}, 1000);
-});
-},
-allowOutsideClick: () => !Swal.isLoading(),
-});
-} else {
-Swal.showValidationMessage('Selección inválida. Por favor, elige una cuenta válida.');
-}
-resolve();
-}, 1000);
-});
-},
-allowOutsideClick: () => !Swal.isLoading(),
-});
+                    }
+                    resolve();
+                  }, 1000);
+                });
+              },
+              allowOutsideClick: () => !Swal.isLoading(),
+            });
+          } else {
+            Swal.showValidationMessage('Selección inválida. Por favor, elige una cuenta válida.');
+          }
+          resolve();
+        }, 1000);
+      });
+    },
+    allowOutsideClick: () => !Swal.isLoading(),
+  });
 }
 
 // Función para generar cuentas aleatorias
 function generarCuentasAleatorias(cantidad) {
-var cuentasAleatorias = [];
-for (var i = 0; i < cantidad; i++) {
-var saldoAleatorio = Math.floor(Math.random() * 5000) + 1000; // Saldo aleatorio entre 1000 y 6000
-cuentasAleatorias.push({ nombreUsuario: "Destino" + (i + 1), codigoCuenta: 8000 + i, saldo: saldoAleatorio });
+  const cuentasAleatorias = [];
+  for (let i = 0; i < cantidad; i++) {
+    const saldoAleatorio = Math.floor(Math.random() * 5000) + 1000; // Saldo aleatorio entre 1000 y 6000
+    cuentasAleatorias.push({ nombreUsuario: "Destino" + (i + 1), codigoCuenta: 8000 + i, saldo: saldoAleatorio });
+  }
+  return cuentasAleatorias;
 }
-return cuentasAleatorias;
-}
+
