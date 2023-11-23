@@ -34,6 +34,7 @@ solicitarPIN();
 // Función para cargar datos guardados desde localStorage
 function cargarDatosGuardados() {
   const nombreUsuarioGuardado = localStorage.getItem('nombreUsuario');
+  const pinIngresadoGuardado = localStorage.getItem('pinIngresado');
   const cuentaSeleccionadaGuardada = localStorage.getItem('cuentaSeleccionada');
 
   if (nombreUsuarioGuardado) {
