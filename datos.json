@@ -1,0 +1,14 @@
+{
+    "nombreUsuario": "Bienvenido/a Estimado",
+    "pin": 1234,
+    "limiteExtraccion": 3000,
+    "precioDeServicioAgua": 350,
+    "precioDeServicioLuz": 210,
+    "precioDeServicioInternet": 570,
+    "precioDeServicioTelefono": 425,
+    "cuentasClientes": [
+      { "nombreUsuario": "Cliente", "codigoCuenta": 1234, "saldo": 8000 },
+      { "nombreUsuario": "Cliente", "codigoCuenta": 5678, "saldo": 10000 }
+    ]
+  }
+  

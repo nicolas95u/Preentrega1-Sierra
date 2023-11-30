@@ -83,6 +83,7 @@ function solicitarPIN() {
             const inputPINNum = parseInt(inputPIN);
             if (inputPINNum === pin) {
               pinIngresado = true;
+              cargarDatosDesdeJSON(); // Llama a la función para cargar datos desde JSON
               // Luego de autenticar, permite seleccionar la cuenta
               seleccionarCuenta();
             } else {
@@ -96,6 +97,7 @@ function solicitarPIN() {
     allowOutsideClick: () => !Swal.isLoading(),
   });
 }
+
 
 // Función para seleccionar una cuenta
 function seleccionarCuenta() {
@@ -395,3 +397,26 @@ function generarCuentasAleatorias(cantidad) {
   return cuentasAleatorias;
 }
 
+function cargarDatosDesdeJSON() {
+  // Ruta al archivo JSON local
+  const jsonPath = '../datos.json';
+
+  fetch(jsonPath)
+    .then(response => {
+    
+      if (!response.ok) {
+        throw new Error('Error al cargar datos desde el archivo JSON');
+      }
+ 
+      return response.json();
+    })
+    .then(datos => {
+      
+      document.getElementById('nombre').innerText = datos.nombreUsuario;
+
+      console.log('Datos cargados correctamente:', datos);
+    })
+    .catch(error => {
+      console.error('Error al cargar datos desde el archivo JSON:', error);
+    });
+}
